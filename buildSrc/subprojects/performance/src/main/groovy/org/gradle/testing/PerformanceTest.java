@@ -37,6 +37,11 @@ public class PerformanceTest extends DistributionTest {
     private String channel;
     private File debugArtifactsDirectory = new File(getProject().getBuildDir(), getName());
 
+    public PerformanceTest() {
+        File artifactsDirectory = new File(getDebugArtifactsDirectory(), "flames");
+        systemProperty("org.gradle.performance.flameGraphTargetDir", artifactsDirectory.getAbsolutePath());
+    }
+
     @Option(option = "scenarios", description = "A semicolon-separated list of performance test scenario ids to run.")
     public void setScenarios(String scenarios) {
         systemProperty("org.gradle.performance.scenarios", scenarios);
@@ -110,8 +115,7 @@ public class PerformanceTest extends DistributionTest {
     @Option(option = "flamegraphs", description = "If set to 'true', activates flamegraphs and stores them into the 'flames' directory name under the debug artifacts directory.")
     public void setFlamegraphs(String flamegraphs) {
         if ("true".equals(flamegraphs)) {
-            File artifactsDirectory = new File(getDebugArtifactsDirectory(), "flames");
-            systemProperty("org.gradle.performance.flameGraphTargetDir", artifactsDirectory.getAbsolutePath());
+
         }
     }
 
