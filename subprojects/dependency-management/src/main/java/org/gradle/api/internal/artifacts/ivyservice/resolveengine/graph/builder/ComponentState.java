@@ -54,7 +54,7 @@ public class ComponentState implements ComponentResolutionState, DependencyGraph
     private final List<NodeState> nodes = Lists.newLinkedList();
     private final Long resultId;
     private final ModuleResolveState module;
-    private final ComponentSelectionReasonInternal selectionReason = VersionSelectionReasons.empty();
+    final List<ComponentSelectionDescriptorInternal> selectionCauses = Lists.newArrayList();
     private final ImmutableCapability implicitCapability;
     private volatile ComponentResolveMetadata metadata;
 
@@ -189,14 +189,22 @@ public class ComponentState implements ComponentResolutionState, DependencyGraph
         if (root) {
             return (ComponentSelectionReasonInternal) VersionSelectionReasons.root();
         }
-        return selectionReason;
+        ComponentSelectionReasonInternal reason = VersionSelectionReasons.empty();
+        for (SelectorState selectorState : module.getSelectors()) {
+            if (selectorState.getFailure() == null) {
+                selectorState.addReasonsForSelector(reason);
+            }
+        }
+        for (ComponentSelectionDescriptorInternal selectionCause : selectionCauses) {
+            reason.addCause(selectionCause);
+        }
+        return reason;
     }
 
     @Override
     public void addCause(ComponentSelectionDescriptorInternal reason) {
-        selectionReason.addCause(reason);
+        selectionCauses.add(reason);
     }
-
 
     public void setRoot() {
         this.root = true;

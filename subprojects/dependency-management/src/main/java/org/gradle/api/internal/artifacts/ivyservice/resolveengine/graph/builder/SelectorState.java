@@ -16,6 +16,7 @@
 
 package org.gradle.api.internal.artifacts.ivyservice.resolveengine.graph.builder;
 
+import com.google.common.collect.Lists;
 import org.gradle.api.artifacts.ModuleIdentifier;
 import org.gradle.api.artifacts.component.ComponentSelector;
 import org.gradle.api.artifacts.component.ModuleComponentSelector;
@@ -36,6 +37,8 @@ import org.gradle.internal.resolve.resolver.DependencyToComponentIdResolver;
 import org.gradle.internal.resolve.result.BuildableComponentIdResolveResult;
 import org.gradle.internal.resolve.result.ComponentIdResolveResult;
 import org.gradle.internal.resolve.result.DefaultBuildableComponentIdResolveResult;
+
+import java.util.List;
 
 import static org.gradle.api.internal.artifacts.ivyservice.resolveengine.result.VersionSelectionReasons.CONSTRAINT;
 import static org.gradle.api.internal.artifacts.ivyservice.resolveengine.result.VersionSelectionReasons.REQUESTED;
@@ -124,8 +127,6 @@ class SelectorState implements DependencyGraphSelector, ResolvableSelectorState 
     }
 
     public void select(ComponentState selected) {
-        addReasonsForSelector(selected.getSelectionReason());
-
         // We should never select a component for a different module, but the JVM software model dependency resolution is doing this.
         // TODO Ditch the JVM Software Model plugins and re-add this assertion
 //        assert selected.getModule() == targetModule;
@@ -153,7 +154,7 @@ class SelectorState implements DependencyGraphSelector, ResolvableSelectorState 
         return addReasonsForSelector(VersionSelectionReasons.empty());
     }
 
-    private ComponentSelectionReasonInternal addReasonsForSelector(ComponentSelectionReasonInternal selectionReason) {
+    ComponentSelectionReasonInternal addReasonsForSelector(ComponentSelectionReasonInternal selectionReason) {
         ComponentSelectionDescriptorInternal dependencyDescriptor = dependencyMetadata.isPending() ? CONSTRAINT : REQUESTED;
         if (dependencyMetadata.getReason() != null) {
             dependencyDescriptor = dependencyDescriptor.withReason(dependencyMetadata.getReason());
