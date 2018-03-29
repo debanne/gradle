@@ -186,10 +186,7 @@ class EdgeState implements DependencyGraphEdge {
 
     @Override
     public ComponentSelectionReason getReason() {
-        if (selector.getFailure() != null) {
-            return selector.getSelectionReason();
-        }
-        return getSelectedComponent().getSelectionReason();
+        return selector.getSelectionReason();
     }
 
     private ComponentState getSelectedComponent() {
