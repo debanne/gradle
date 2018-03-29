@@ -113,8 +113,6 @@ public class DependencyGraphBuilder {
 
         validateGraph(resolveState);
 
-        resolveState.getRoot().getComponent().setRoot();
-
         assembleResult(resolveState, modelVisitor);
 
     }

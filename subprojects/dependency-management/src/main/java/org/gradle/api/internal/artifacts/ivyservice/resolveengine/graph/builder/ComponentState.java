@@ -64,6 +64,7 @@ public class ComponentState implements ComponentResolutionState, DependencyGraph
     private DependencyGraphBuilder.VisitState visitState = DependencyGraphBuilder.VisitState.NotSeen;
 
     private boolean rejected;
+    private boolean root;
 
     ComponentState(Long resultId, ModuleResolveState module, ModuleVersionIdentifier id, ComponentIdentifier componentIdentifier, ComponentMetaDataResolver resolver, VariantNameBuilder variantNameBuilder) {
         this.resultId = resultId;
@@ -185,6 +186,9 @@ public class ComponentState implements ComponentResolutionState, DependencyGraph
 
     @Override
     public ComponentSelectionReasonInternal getSelectionReason() {
+        if (root) {
+            return (ComponentSelectionReasonInternal) VersionSelectionReasons.root();
+        }
         return selectionReason;
     }
 
@@ -195,7 +199,7 @@ public class ComponentState implements ComponentResolutionState, DependencyGraph
 
 
     public void setRoot() {
-        selectionReason.setCause(VersionSelectionReasons.ROOT);
+        this.root = true;
     }
 
     @Override
