@@ -194,7 +194,14 @@ public class DependencyGraphBuilder {
             assert dependency.getTargetComponent() == null;
             SelectorState selector = dependency.getSelector();
 
-            performSelection(resolveState, dependency, selector);
+            if (selector.isUnprocessed()) {
+                // Selector not yet resolved: resolve it, together with all existing selectors for module
+                performSelection(resolveState, selector);
+            }
+
+            if (selector.getFailure() == null) {
+                dependency.start(selector.getTargetModule().getSelected());
+            }
 
             selector.getTargetModule().addUnattachedDependency(dependency);
         }
@@ -206,13 +213,7 @@ public class DependencyGraphBuilder {
      * and added to the graph.
      * On resolve failure, the failure is recorded and no `ComponentState` is selected.
      */
-    private void performSelection(ResolveState resolveState, EdgeState dependency, SelectorState selector) {
-        // Selector already resolved: just attach the edge.
-        if (selector.selected != null) {
-            dependency.start(selector.selected);
-            return;
-        }
-
+    private void performSelection(ResolveState resolveState, SelectorState selector) {
         ModuleResolveState module = selector.getTargetModule();
         ComponentState currentSelection = module.getSelected();
 
@@ -221,15 +222,13 @@ public class DependencyGraphBuilder {
         try {
             selected = selectorStateResolver.selectBest(module.getId(), module.getSelectors());
         } catch (ModuleVersionResolveException e) {
-            // Ignore: failure will be retained on selector
+            // Ignore: All selectors failed, and will have failures recorded
             return;
         }
 
-        dependency.start(selected);
-        selector.select(selected);
-
         // If no current selection for module, just use the candidate.
         if (currentSelection == null) {
+            selector.select(selected);
             module.select(selected);
             // This is the first time we've seen the module, so register with conflict resolver.
             checkForModuleConflicts(resolveState, module);
@@ -238,6 +237,7 @@ public class DependencyGraphBuilder {
 
         // If current selection is still the best choice, then only need to point new edge/selector at current selection.
         if (selected == currentSelection) {
+            selector.select(selected);
             return;
         }
 

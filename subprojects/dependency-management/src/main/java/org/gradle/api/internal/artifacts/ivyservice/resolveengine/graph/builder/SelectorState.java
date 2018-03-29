@@ -178,4 +178,7 @@ class SelectorState implements DependencyGraphSelector, ResolvableSelectorState 
             && ((LocalOriginDependencyMetadata) dependencyMetadata).isForce();
     }
 
+    public boolean isUnprocessed() {
+        return selected == null && failure == null;
+    }
 }
