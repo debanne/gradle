@@ -124,7 +124,6 @@ class SelectorState implements DependencyGraphSelector, ResolvableSelectorState 
     }
 
     public void select(ComponentState selected) {
-        selected.selectedBy(this);
         addReasonsForSelector(selected.getSelectionReason());
 
         // We should never select a component for a different module, but the JVM software model dependency resolution is doing this.
