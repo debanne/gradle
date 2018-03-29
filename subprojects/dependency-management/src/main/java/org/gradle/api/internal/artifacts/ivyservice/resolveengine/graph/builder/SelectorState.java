@@ -55,7 +55,7 @@ class SelectorState implements DependencyGraphSelector, ResolvableSelectorState 
     private ComponentIdResolveResult idResolveResult;
     private ModuleVersionResolveException failure;
     private ModuleResolveState targetModule;
-    ComponentState selected;
+    boolean processed;
 
     SelectorState(Long id, DependencyState dependencyState, DependencyToComponentIdResolver resolver, ResolveState resolveState, ModuleIdentifier targetModuleId) {
         this.id = id;
@@ -123,21 +123,11 @@ class SelectorState implements DependencyGraphSelector, ResolvableSelectorState 
         return idResolveResult;
     }
 
-    public void select(ComponentState selected) {
-        // We should never select a component for a different module, but the JVM software model dependency resolution is doing this.
-        // TODO Ditch the JVM Software Model plugins and re-add this assertion
-//        assert selected.getModule() == targetModule;
-
-        this.selected = selected;
-    }
-
     /**
      * Overrides the component that is the chosen for this selector.
      * This happens when the `ModuleResolveState` is restarted, during conflict resolution or version range merging.
      */
     public void overrideSelection(ComponentState selected) {
-        this.selected = selected;
-
         // Target module can change, if this is called as the result of a module replacement conflict.
         this.targetModule = selected.getModule();
 
@@ -179,6 +169,6 @@ class SelectorState implements DependencyGraphSelector, ResolvableSelectorState 
     }
 
     public boolean isUnprocessed() {
-        return selected == null && failure == null;
+        return !processed;
     }
 }

@@ -197,6 +197,11 @@ public class DependencyGraphBuilder {
             if (selector.isUnprocessed()) {
                 // Selector not yet resolved: resolve it, together with all existing selectors for module
                 performSelection(resolveState, selector);
+
+                // Mark all selectors for module as processed
+                for (SelectorState selectorState : selector.getTargetModule().getSelectors()) {
+                    selectorState.processed = true;
+                }
             }
 
             if (selector.getFailure() == null) {
@@ -209,7 +214,7 @@ public class DependencyGraphBuilder {
 
     /**
      * Attempts to resolve a target `ComponentState` for the given dependency.
-     * On successful resolve, a `ComponentState` is constructed for the identifier, recorded as {@link SelectorState#selected},
+     * On successful resolve, a `ComponentState` is constructed for the identifier, recorded as {@link ModuleResolveState#selected},
      * and added to the graph.
      * On resolve failure, the failure is recorded and no `ComponentState` is selected.
      */
@@ -228,7 +233,6 @@ public class DependencyGraphBuilder {
 
         // If no current selection for module, just use the candidate.
         if (currentSelection == null) {
-            selector.select(selected);
             module.select(selected);
             // This is the first time we've seen the module, so register with conflict resolver.
             checkForModuleConflicts(resolveState, module);
@@ -237,7 +241,6 @@ public class DependencyGraphBuilder {
 
         // If current selection is still the best choice, then only need to point new edge/selector at current selection.
         if (selected == currentSelection) {
-            selector.select(selected);
             return;
         }
 
